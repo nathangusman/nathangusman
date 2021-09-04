@@ -5977,8 +5977,11 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.NinePatch.Cnds.CompareInstanceVar,
 		C3.Plugins.NinePatch.Acts.SetVisible,
 		C3.Behaviors.scrollto.Acts.Shake,
-		C3.Behaviors.Platform.Cnds.IsJumping,
 		C3.Behaviors.Platform.Acts.SetMaxSpeed,
+		C3.Plugins.Sprite.Cnds.IsAnimPlaying,
+		C3.Plugins.Sprite.Acts.SetX,
+		C3.Plugins.Sprite.Exps.X,
+		C3.Behaviors.Platform.Cnds.IsJumping,
 		C3.Plugins.Text.Acts.SetVisible,
 		C3.Behaviors.Platform.Acts.SetEnabled,
 		C3.Behaviors.Platform.Cnds.OnJump,
@@ -6552,10 +6555,18 @@ self.C3_ExpressionFuncs = [
 		() => 2.6,
 		() => 0.5,
 		() => 160,
+		p => {
+			const n0 = p._GetNode(0);
+			return () => C3.lerp(n0.ExpObject(), 7257.5, 0.05);
+		},
 		() => "Animation 4",
 		() => -10,
 		() => 0.7,
 		() => 270,
+		p => {
+			const n0 = p._GetNode(0);
+			return () => C3.lerp(n0.ExpObject(), 10787, 0.05);
+		},
 		p => {
 			const v0 = p._GetNode(0).GetVar();
 			return () => v0.GetValue();
@@ -6577,7 +6588,7 @@ self.C3_ExpressionFuncs = [
 		() => "Animation 5",
 		() => "https://Supersaffira.com",
 		() => 200,
-		() => 227,
+		() => 226,
 		() => "https://www.youtube.com/watch?v=ji5KDN_KvKI&ab_channel=SuperSaffira",
 		() => "https://open.spotify.com/album/4wLgMdQJvjFclUtTLUp5rY?highlight=spotify:track:7BlWv7lcqQWyOunAsacl3J",
 		() => "https://www.instagram.com/supersaffira/",
