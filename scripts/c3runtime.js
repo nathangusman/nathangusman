@@ -6001,7 +6001,14 @@ self.C3_GetObjectRefTable = function () {
 		C3.Behaviors.Platform.Acts.SetVectorX,
 		C3.Behaviors.Flash.Cnds.OnFlashEnded,
 		C3.Plugins.System.Cnds.IsGroupActive,
-		C3.Plugins.Sprite.Cnds.OnCreated
+		C3.Plugins.Sprite.Cnds.OnCreated,
+		C3.Plugins.TiledBg.Acts.SetWidth,
+		C3.Plugins.TiledBg.Exps.Width,
+		C3.Plugins.TiledBg.Exps.X,
+		C3.Plugins.TiledBg.Cnds.CompareWidth,
+		C3.Plugins.System.Cnds.Compare,
+		C3.Plugins.System.Exps.loadingprogress,
+		C3.Behaviors.Fade.Cnds.OnFadeOutEnd
 	];
 };
 self.C3_JsPropNameTable = [
@@ -6349,6 +6356,10 @@ self.C3_JsPropNameTable = [
 	{Confirmarnome: 0},
 	{engrenagem: 0},
 	{leaderboard: 0},
+	{TiledBackground: 0},
+	{Texto11: 0},
+	{TiledBackground2: 0},
+	{REI: 0},
 	{FPlayer: 0},
 	{Familia1: 0},
 	{dano: 0},
@@ -6374,6 +6385,7 @@ self.C3_JsPropNameTable = [
 	{Equidimundos: 0},
 	{isEasy: 0},
 	{borboleta: 0},
+	{TipoDeMorte: 0},
 	{Variávellulamias: 0},
 	{Variávellulamias2: 0}
 ];
@@ -6572,7 +6584,9 @@ self.C3_ExpressionFuncs = [
 			return () => v0.GetValue();
 		},
 		() => 8,
+		() => "outro",
 		() => "coin",
+		() => "bomba",
 		() => -2,
 		() => "bomb",
 		() => -3,
@@ -6588,10 +6602,11 @@ self.C3_ExpressionFuncs = [
 		() => "Animation 5",
 		() => "https://Supersaffira.com",
 		() => 200,
-		() => 226,
+		() => 223,
 		() => "https://www.youtube.com/watch?v=ji5KDN_KvKI&ab_channel=SuperSaffira",
 		() => "https://open.spotify.com/album/4wLgMdQJvjFclUtTLUp5rY?highlight=spotify:track:7BlWv7lcqQWyOunAsacl3J",
 		() => "https://www.instagram.com/supersaffira/",
+		() => "morte",
 		() => -100,
 		() => -717750020342783,
 		() => -43805311999,
@@ -6609,7 +6624,24 @@ self.C3_ExpressionFuncs = [
 		() => -1000,
 		() => "Feedback",
 		() => -250,
-		() => "http://institutoazul97.com/"
+		() => "Não se esqueça do double jump!",
+		() => "Seja mais atento à seus desejos!",
+		() => "Você foi muito ambicioso!",
+		() => "http://institutoazul97.com/",
+		p => {
+			const n0 = p._GetNode(0);
+			return () => C3.lerp(n0.ExpObject(), 150, 0.02);
+		},
+		p => {
+			const n0 = p._GetNode(0);
+			const n1 = p._GetNode(1);
+			return () => (n0.ExpObject() + n1.ExpObject());
+		},
+		p => {
+			const n0 = p._GetNode(0);
+			return () => (and(("Carregando..." + "\n"), Math.round((n0.ExpObject() / 1.5))) + "%");
+		},
+		() => 149
 ];
 
 
