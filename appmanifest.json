@@ -1,0 +1,10 @@
+{
+	"name": "SaffiraTudoGame",
+	"short_name": "SaffiraTudoGame",
+	"description": "Super Saffira Game: Tudo",
+	"start_url": "index.html",
+	"display": "fullscreen",
+	"orientation": "landscape",
+	"background_color": "#ffffff",
+	"icons": []
+}
