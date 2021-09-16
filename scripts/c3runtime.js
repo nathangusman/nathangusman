@@ -3025,16 +3025,6 @@ self["C3_Shaders"]["difference"] = {
 	animated: false,
 	parameters: []
 };
-self["C3_Shaders"]["hsladjust"] = {
-	src: "varying mediump vec2 vTex;\nuniform lowp sampler2D samplerFront;\nprecision mediump float;\nuniform float huerotate;\nuniform float satadjust;\nuniform float lumadjust;\nvec3 rgb_to_hsl(vec3 color)\n{\nvec3 hsl = vec3(0.0, 0.0, 0.0);\nfloat fmin = min(min(color.r, color.g), color.b);\nfloat fmax = max(max(color.r, color.g), color.b);\nfloat delta = fmax - fmin;\nhsl.z = (fmax + fmin) / 2.0;\nif (delta == 0.0)\n{\nhsl.x = 0.0;\nhsl.y = 0.0;\n}\nelse\n{\nif (hsl.z < 0.5)\nhsl.y = delta / (fmax + fmin);\nelse\nhsl.y = delta / (2.0 - fmax - fmin);\nfloat dR = (((fmax - color.r) / 6.0) + (delta / 2.0)) / delta;\nfloat dG = (((fmax - color.g) / 6.0) + (delta / 2.0)) / delta;\nfloat dB = (((fmax - color.b) / 6.0) + (delta / 2.0)) / delta;\nif (color.r == fmax)\nhsl.x = dB - dG;\nelse if (color.g == fmax)\nhsl.x = (1.0 / 3.0) + dR - dB;\nelse if (color.b == fmax)\nhsl.x = (2.0 / 3.0) + dG - dR;\nif (hsl.x < 0.0)\nhsl.x += 1.0;\nelse if (hsl.x > 1.0)\nhsl.x -= 1.0;\n}\nreturn hsl;\n}\nfloat hue_to_rgb(float f1, float f2, float hue)\n{\nif (hue < 0.0)\nhue += 1.0;\nelse if (hue > 1.0)\nhue -= 1.0;\nfloat ret;\nif ((6.0 * hue) < 1.0)\nret = f1 + (f2 - f1) * 6.0 * hue;\nelse if ((2.0 * hue) < 1.0)\nret = f2;\nelse if ((3.0 * hue) < 2.0)\nret = f1 + (f2 - f1) * ((2.0 / 3.0) - hue) * 6.0;\nelse\nret = f1;\nreturn ret;\n}\nvec3 hsl_to_rgb(vec3 hsl)\n{\nvec3 rgb = vec3(hsl.z);\nif (hsl.y != 0.0)\n{\nfloat f2;\nif (hsl.z < 0.5)\nf2 = hsl.z * (1.0 + hsl.y);\nelse\nf2 = (hsl.z + hsl.y) - (hsl.y * hsl.z);\nfloat f1 = 2.0 * hsl.z - f2;\nrgb.r = hue_to_rgb(f1, f2, hsl.x + (1.0 / 3.0));\nrgb.g = hue_to_rgb(f1, f2, hsl.x);\nrgb.b = hue_to_rgb(f1, f2, hsl.x - (1.0 / 3.0));\n}\nreturn rgb;\n}\nvoid main(void)\n{\nvec4 front = texture2D(samplerFront, vTex);\nvec3 rgb = rgb_to_hsl(front.rgb) + vec3((huerotate > 0.5 ? huerotate - 1.0 : huerotate), 0, (lumadjust - 1.0) * front.a);\nrgb.y *= satadjust;\nrgb = hsl_to_rgb(rgb);\ngl_FragColor = vec4(rgb, front.a);\n}",
-	extendBoxHorizontal: 0,
-	extendBoxVertical: 0,
-	crossSampling: false,
-	mustPreDraw: false,
-	preservesOpaqueness: true,
-	animated: false,
-	parameters: [["huerotate",0,"percent"],["satadjust",0,"percent"],["lumadjust",0,"percent"]]
-};
 self["C3_Shaders"]["water"] = {
 	src: "#ifdef GL_FRAGMENT_PRECISION_HIGH\n#define highmedp highp\n#else\n#define highmedp mediump\n#endif\nvarying mediump vec2 vTex;\nuniform lowp sampler2D samplerFront;\nuniform mediump vec2 srcStart;\nuniform mediump vec2 srcEnd;\nprecision mediump float;\nuniform highmedp float seconds;\nuniform mediump vec2 pixelSize;\nconst float PI = 3.1415926535897932;\nuniform float speed;\nuniform float speed_x;\nuniform float speed_y;\nuniform float intensity;\nconst float steps = 8.0;\nuniform float frequency;\nuniform float angle; // better when a prime\nuniform float delta;\nuniform float intence;\nuniform float emboss;\nfloat col(vec2 coord)\n{\nfloat delta_theta = 2.0 * PI / angle;\nfloat col = 0.0;\nfloat theta = 0.0;\nfor (float i = 0.0; i < steps; i++)\n{\nvec2 adjc = coord;\ntheta = delta_theta*i;\nadjc.x += cos(theta)*seconds*speed + seconds * speed_x;\nadjc.y -= sin(theta)*seconds*speed - seconds * speed_y;\ncol = col + cos( (adjc.x*cos(theta) - adjc.y*sin(theta))*frequency)*intensity;\n}\nreturn cos(col);\n}\nvoid main(void)\n{\nmediump vec2 tex = (vTex - srcStart) / (srcEnd - srcStart);\nvec2 p = tex, c1 = p, c2 = p;\nfloat cc1 = col(c1);\nc2.x += (1.0 / pixelSize.x) / delta;\nfloat dx = emboss*(cc1-col(c2))/delta;\nc2.x = p.x;\nc2.y += (1.0 / pixelSize.y) / delta;\nfloat dy = emboss*(cc1-col(c2))/delta;\nc1.x += dx;\nc1.y = -(c1.y+dy);\nfloat alpha = 1.+dot(dx,dy)*intence;\nc1.y = -c1.y;\nc1 = clamp(c1, 0.0, 1.0);\ngl_FragColor = texture2D(samplerFront, mix(srcStart, srcEnd, c1)) * alpha;\n}",
 	extendBoxHorizontal: 40,
@@ -3054,6 +3044,16 @@ self["C3_Shaders"]["toon"] = {
 	preservesOpaqueness: true,
 	animated: false,
 	parameters: [["threshold",0,"percent"],["quantizationLevels",0,"float"]]
+};
+self["C3_Shaders"]["hsladjust"] = {
+	src: "varying mediump vec2 vTex;\nuniform lowp sampler2D samplerFront;\nprecision mediump float;\nuniform float huerotate;\nuniform float satadjust;\nuniform float lumadjust;\nvec3 rgb_to_hsl(vec3 color)\n{\nvec3 hsl = vec3(0.0, 0.0, 0.0);\nfloat fmin = min(min(color.r, color.g), color.b);\nfloat fmax = max(max(color.r, color.g), color.b);\nfloat delta = fmax - fmin;\nhsl.z = (fmax + fmin) / 2.0;\nif (delta == 0.0)\n{\nhsl.x = 0.0;\nhsl.y = 0.0;\n}\nelse\n{\nif (hsl.z < 0.5)\nhsl.y = delta / (fmax + fmin);\nelse\nhsl.y = delta / (2.0 - fmax - fmin);\nfloat dR = (((fmax - color.r) / 6.0) + (delta / 2.0)) / delta;\nfloat dG = (((fmax - color.g) / 6.0) + (delta / 2.0)) / delta;\nfloat dB = (((fmax - color.b) / 6.0) + (delta / 2.0)) / delta;\nif (color.r == fmax)\nhsl.x = dB - dG;\nelse if (color.g == fmax)\nhsl.x = (1.0 / 3.0) + dR - dB;\nelse if (color.b == fmax)\nhsl.x = (2.0 / 3.0) + dG - dR;\nif (hsl.x < 0.0)\nhsl.x += 1.0;\nelse if (hsl.x > 1.0)\nhsl.x -= 1.0;\n}\nreturn hsl;\n}\nfloat hue_to_rgb(float f1, float f2, float hue)\n{\nif (hue < 0.0)\nhue += 1.0;\nelse if (hue > 1.0)\nhue -= 1.0;\nfloat ret;\nif ((6.0 * hue) < 1.0)\nret = f1 + (f2 - f1) * 6.0 * hue;\nelse if ((2.0 * hue) < 1.0)\nret = f2;\nelse if ((3.0 * hue) < 2.0)\nret = f1 + (f2 - f1) * ((2.0 / 3.0) - hue) * 6.0;\nelse\nret = f1;\nreturn ret;\n}\nvec3 hsl_to_rgb(vec3 hsl)\n{\nvec3 rgb = vec3(hsl.z);\nif (hsl.y != 0.0)\n{\nfloat f2;\nif (hsl.z < 0.5)\nf2 = hsl.z * (1.0 + hsl.y);\nelse\nf2 = (hsl.z + hsl.y) - (hsl.y * hsl.z);\nfloat f1 = 2.0 * hsl.z - f2;\nrgb.r = hue_to_rgb(f1, f2, hsl.x + (1.0 / 3.0));\nrgb.g = hue_to_rgb(f1, f2, hsl.x);\nrgb.b = hue_to_rgb(f1, f2, hsl.x - (1.0 / 3.0));\n}\nreturn rgb;\n}\nvoid main(void)\n{\nvec4 front = texture2D(samplerFront, vTex);\nvec3 rgb = rgb_to_hsl(front.rgb) + vec3((huerotate > 0.5 ? huerotate - 1.0 : huerotate), 0, (lumadjust - 1.0) * front.a);\nrgb.y *= satadjust;\nrgb = hsl_to_rgb(rgb);\ngl_FragColor = vec4(rgb, front.a);\n}",
+	extendBoxHorizontal: 0,
+	extendBoxVertical: 0,
+	crossSampling: false,
+	mustPreDraw: false,
+	preservesOpaqueness: true,
+	animated: false,
+	parameters: [["huerotate",0,"percent"],["satadjust",0,"percent"],["lumadjust",0,"percent"]]
 };
 self["C3_Shaders"]["swirl"] = {
 	src: "#ifdef GL_FRAGMENT_PRECISION_HIGH\n#define highmedp highp\n#else\n#define highmedp mediump\n#endif\nvarying mediump vec2 vTex;\nuniform lowp sampler2D samplerFront;\nuniform mediump vec2 srcOriginStart;\nuniform mediump vec2 srcOriginEnd;\nuniform mediump float radius;\nuniform mediump float angle;\nvoid main(void)\n{\nmediump vec2 center = vec2(0.5, 0.5);\nhighmedp vec2 srcOriginSize = srcOriginEnd - srcOriginStart;\nhighmedp vec2 tex = ((vTex - srcOriginStart) / srcOriginSize);\nhighmedp float dist = distance(center, tex);\ntex -= center;\nif (dist < radius)\n{\nhighmedp float percent = (radius - dist) / radius;\nhighmedp float theta = percent * percent * angle * 8.0;\nhighmedp float s = sin(theta);\nhighmedp float c = cos(theta);\ntex = vec2(dot(tex, vec2(c, -s)), dot(tex, vec2(s, c)));\n}\ntex += center;\ntex = clamp(tex, 0.0, 1.0);\t\t\t// ensure no sampling outside source rect\ntex = (tex * srcOriginSize) + srcOriginStart;\t// convert back relative to source rect\ngl_FragColor = texture2D(samplerFront, tex);\n}",
@@ -5457,48 +5457,6 @@ map.get(this)._SetMaxLength(l)}get maxLength(){return map.get(this)._GetMaxLengt
 }
 
 {
-'use strict';const C3=self.C3;C3.Plugins.LocalStorage=class LocalStoragePlugin extends C3.SDKPluginBase{constructor(opts){super(opts)}Release(){super.Release()}};
-
-}
-
-{
-'use strict';const C3=self.C3;C3.Plugins.LocalStorage.Type=class LocalStorageType extends C3.SDKTypeBase{constructor(objectClass){super(objectClass)}Release(){super.Release()}OnCreate(){}};
-
-}
-
-{
-'use strict';const C3=self.C3;
-C3.Plugins.LocalStorage.Instance=class LocalStorageInstance extends C3.SDKInstanceBase{constructor(inst,properties){super(inst);this._currentKey="";this._lastValue="";this._keyNamesList=[];this._errorMessage="";this._pendingGets=0;this._pendingSets=0;this._storage=this._runtime._GetProjectStorage();this._debugCache=new Map;this._isLoadingDebugCache=false}Release(){super.Release()}async _TriggerStorageError(err){this._errorMessage=this._GetErrorString(err);await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnError)}_GetErrorString(err){if(!err)return"unknown error";else if(typeof err===
-"string")return err;else if(typeof err.message==="string")return err.message;else if(typeof err.name==="string")return err.name;else if(typeof err.data==="string")return err.data;else return"unknown error"}GetDebuggerProperties(){if(!this._isLoadingDebugCache)this._DebugCacheStorage();return[{title:"plugins.localstorage.name",properties:[...this._debugCache.entries()].map(entry=>({name:"$"+entry[0],value:entry[1],onedit:v=>this._storage.setItem(entry[0],v)}))}]}async _DebugCacheStorage(){this._isLoadingDebugCache=
-true;try{const keyList=await this._storage.keys();keyList.sort((a,b)=>{const la=a.toLowerCase();const lb=b.toLowerCase();if(la<lb)return-1;else if(lb<la)return 1;else return 0});const values=await Promise.all(keyList.map(key=>this._storage.getItem(key)));this._debugCache.clear();for(let i=0,len=keyList.length;i<len;++i)this._debugCache.set(keyList[i],values[i])}catch(err){console.warn("[C3 debugger] Error displaying local storage: ",err)}finally{this._isLoadingDebugCache=false}}};
-
-}
-
-{
-'use strict';const C3=self.C3;
-C3.Plugins.LocalStorage.Cnds={OnItemSet(key){return this._currentKey===key},OnAnyItemSet(){return true},OnItemGet(key){return this._currentKey===key},OnAnyItemGet(){return true},OnItemRemoved(key){return this._currentKey===key},OnAnyItemRemoved(){return true},OnCleared(){return true},OnAllKeyNamesLoaded(){return true},OnError(){return true},OnItemExists(key){return this._currentKey===key},OnItemMissing(key){return this._currentKey===key},CompareKey(cmp,key){return C3.compare(this._currentKey,cmp,
-key)},CompareValue(cmp,v){return C3.compare(this._lastValue,cmp,v)},IsProcessingSets(){return this._pendingSets>0},IsProcessingGets(){return this._pendingGets>0},OnAllSetsComplete(){return true},OnAllGetsComplete(){return true}};
-
-}
-
-{
-'use strict';const C3=self.C3;function IsExpressionType(x){return typeof x==="string"||typeof x==="number"}
-C3.Plugins.LocalStorage.Acts={async SetItem(key,value){this._pendingSets++;try{const valueSet=await this._storage.setItem(key,value);await this.ScheduleTriggers(async()=>{this._currentKey=key;this._lastValue=valueSet;await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnAnyItemSet);await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnItemSet)})}catch(err){await this._TriggerStorageError(err)}finally{this._pendingSets--;if(this._pendingSets===0)await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnAllSetsComplete)}},
-async SetBinaryItem(key,objectClass){if(!objectClass)return;const inst=objectClass.GetFirstPicked(this._inst);if(!inst)return;const sdkInst=inst.GetSdkInstance();if(!sdkInst)return;const buffer=sdkInst.GetArrayBufferReadOnly();this._pendingSets++;try{await this._storage.setItem(key,buffer);await this.ScheduleTriggers(async()=>{this._currentKey=key;this._lastValue="";await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnAnyItemSet);await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnItemSet)})}catch(err){await this._TriggerStorageError(err)}finally{this._pendingSets--;
-if(this._pendingSets===0)await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnAllSetsComplete)}},async GetItem(key){this._pendingGets++;try{const value=await this._storage.getItem(key);await this.ScheduleTriggers(async()=>{this._currentKey=key;this._lastValue=IsExpressionType(value)?value:"";await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnAnyItemGet);await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnItemGet)})}catch(err){await this._TriggerStorageError(err)}finally{this._pendingGets--;
-if(this._pendingGets===0)await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnAllGetsComplete)}},async GetBinaryItem(key,objectClass){if(!objectClass)return;const inst=objectClass.GetFirstPicked(this._inst);if(!inst)return;const sdkInst=inst.GetSdkInstance();this._pendingGets++;try{let value=await this._storage.getItem(key);value=value instanceof ArrayBuffer?value:new ArrayBuffer(0);await this.ScheduleTriggers(async()=>{this._lastValue="";this._currentKey=key;sdkInst.SetArrayBufferTransfer(value);
-await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnAnyItemGet);await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnItemGet)})}catch(err){await this._TriggerStorageError(err)}finally{this._pendingGets--;if(this._pendingGets===0)await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnAllGetsComplete)}},async CheckItemExists(key){try{const value=await this._storage.getItem(key);await this.ScheduleTriggers(async()=>{this._currentKey=key;if(typeof value==="undefined"||value===null){this._lastValue=
-"";await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnItemMissing)}else{this._lastValue=IsExpressionType(value)?value:"";await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnItemExists)}})}catch(err){await this._TriggerStorageError(err)}},async RemoveItem(key){try{await this._storage.removeItem(key);await this.ScheduleTriggers(async()=>{this._currentKey=key;this._lastValue="";await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnAnyItemRemoved);await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnItemRemoved)})}catch(err){await this._TriggerStorageError(err)}},
-async ClearStorage(){try{await this._storage.clear();await this.ScheduleTriggers(async()=>{this._currentKey="";this._lastValue="";C3.clearArray(this._keyNamesList);await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnCleared)})}catch(err){await this._TriggerStorageError(err)}},async GetAllKeyNames(){try{const keyList=await this._storage.keys();await this.ScheduleTriggers(async()=>{this._keyNamesList=keyList;await this.TriggerAsync(C3.Plugins.LocalStorage.Cnds.OnAllKeyNamesLoaded)})}catch(err){await this._TriggerStorageError(err)}}};
-
-}
-
-{
-'use strict';const C3=self.C3;C3.Plugins.LocalStorage.Exps={ItemValue(){return this._lastValue},Key(){return this._currentKey},KeyCount(){return this._keyNamesList.length},KeyAt(i){i=Math.floor(i);if(i<0||i>=this._keyNamesList.length)return"";return this._keyNamesList[i]},ErrorMessage(){return this._errorMessage}};
-
-}
-
-{
 'use strict';const C3=self.C3;C3.Behaviors.solid=class SolidBehavior extends C3.SDKBehaviorBase{constructor(opts){super(opts)}Release(){super.Release()}};
 
 }
@@ -5663,36 +5621,6 @@ this._runtime.Random()*Math.PI*2;const d=this._runtime.Random()*mag;offX=Math.co
 
 {
 'use strict';const C3=self.C3;C3.Behaviors.scrollto.Exps={};
-
-}
-
-{
-'use strict';const C3=self.C3;C3.Behaviors.destroy=class DestroyOutsideLayoutBehavior extends C3.SDKBehaviorBase{constructor(opts){super(opts)}Release(){super.Release()}};
-
-}
-
-{
-'use strict';const C3=self.C3;C3.Behaviors.destroy.Type=class DestroyOutsideLayoutType extends C3.SDKBehaviorTypeBase{constructor(behaviorType){super(behaviorType)}Release(){super.Release()}OnCreate(){}};
-
-}
-
-{
-'use strict';const C3=self.C3;C3.Behaviors.destroy.Instance=class DestroyOutsideLayoutInstance extends C3.SDKBehaviorInstanceBase{constructor(behInst,properties){super(behInst);this._StartTicking()}Release(){super.Release()}Tick(){const wi=this._inst.GetWorldInfo();const bbox=wi.GetBoundingBox();const layout=wi.GetLayout();if(bbox.getRight()<0||bbox.getBottom()<0||bbox.getLeft()>layout.GetWidth()||bbox.getTop()>layout.GetHeight())this._runtime.DestroyInstance(this._inst)}};
-
-}
-
-{
-'use strict';const C3=self.C3;C3.Behaviors.destroy.Cnds={};
-
-}
-
-{
-'use strict';const C3=self.C3;C3.Behaviors.destroy.Acts={};
-
-}
-
-{
-'use strict';const C3=self.C3;C3.Behaviors.destroy.Exps={};
 
 }
 
@@ -5966,7 +5894,6 @@ self.C3_GetObjectRefTable = function () {
 		C3.Behaviors.EightDir,
 		C3.Plugins.Audio,
 		C3.Behaviors.scrollto,
-		C3.Behaviors.destroy,
 		C3.Behaviors.Fade,
 		C3.Behaviors.Flash,
 		C3.Plugins.NinePatch,
@@ -5979,7 +5906,6 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.Browser,
 		C3.Plugins.Eponesh_GameScore,
 		C3.Plugins.TextBox,
-		C3.Plugins.LocalStorage,
 		C3.Plugins.System.Cnds.Every,
 		C3.Plugins.Sprite.Acts.SetAnim,
 		C3.Plugins.Touch.Cnds.IsTouchingObject,
@@ -5991,7 +5917,6 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.Audio.Acts.Play,
 		C3.Plugins.System.Acts.LoadLayoutTextures,
 		C3.Plugins.Audio.Acts.Preload,
-		C3.Plugins.System.Cnds.CompareBoolVar,
 		C3.Plugins.Eponesh_GameScore.Cnds.PlayerHasKey,
 		C3.Plugins.System.Acts.SetLayerVisible,
 		C3.Plugins.TextBox.Acts.SetText,
@@ -6000,10 +5925,6 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.System.Cnds.Else,
 		C3.Plugins.Eponesh_GameScore.Exps.PlayerGet,
 		C3.Plugins.Eponesh_GameScore.Exps.PlayerName,
-		C3.Plugins.LocalStorage.Acts.CheckItemExists,
-		C3.Plugins.TextBox.Acts.Destroy,
-		C3.Plugins.Text.Cnds.IsBoolInstanceVarSet,
-		C3.Plugins.Text.Acts.Destroy,
 		C3.Plugins.Sprite.Cnds.OnCollision,
 		C3.Plugins.System.Cnds.CompareVar,
 		C3.Plugins.System.Acts.AddVar,
@@ -6018,33 +5939,22 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.Audio.Acts.Stop,
 		C3.Plugins.TextBox.Cnds.OnTextChanged,
 		C3.Plugins.TextBox.Exps.Text,
-		C3.Plugins.System.Acts.SetVar,
-		C3.Plugins.LocalStorage.Acts.SetItem,
 		C3.Plugins.Touch.Cnds.OnTouchObject,
-		C3.Plugins.TextBox.Cnds.CompareText,
 		C3.Plugins.Eponesh_GameScore.Acts.PlayerSetName,
 		C3.Plugins.Eponesh_GameScore.Acts.PlayerSet,
 		C3.Plugins.Eponesh_GameScore.Acts.PlayerSync,
 		C3.Plugins.Eponesh_GameScore.Acts.LeaderboardOpen,
 		C3.Plugins.Touch.Cnds.OnTouchStart,
+		C3.Plugins.System.Cnds.CompareBoolVar,
 		C3.Plugins.Eponesh_GameScore.Cnds.OnPlayerLoginError,
 		C3.Plugins.Eponesh_GameScore.Acts.PlayerLogin,
-		C3.Plugins.LocalStorage.Cnds.OnItemExists,
-		C3.Plugins.LocalStorage.Acts.GetItem,
-		C3.Plugins.LocalStorage.Cnds.OnItemGet,
-		C3.Plugins.LocalStorage.Exps.ItemValue,
-		C3.Plugins.System.Cnds.EveryTick,
-		C3.Plugins.Keyboard.Cnds.OnKey,
-		C3.Plugins.Keyboard.Cnds.IsKeyDown,
-		C3.Plugins.LocalStorage.Acts.ClearStorage,
 		C3.Behaviors.Bullet.Acts.SetEnabled,
 		C3.Plugins.Sprite.Acts.AddChild,
 		C3.Behaviors.Bullet.Acts.SetSpeed,
-		C3.Plugins.Sprite.Acts.SetInstanceVar,
-		C3.Plugins.System.Exps.choose,
 		C3.Plugins.Sprite.Acts.MoveForward,
 		C3.Plugins.Sprite.Acts.SetOpacity,
 		C3.Behaviors.MoveTo.Acts.MoveToPosition,
+		C3.Plugins.Text.Acts.Destroy,
 		C3.Behaviors.EightDir.Acts.SetEnabled,
 		C3.Behaviors.scrollto.Acts.SetEnabled,
 		C3.Plugins.Sprite.Acts.Spawn,
@@ -6053,6 +5963,7 @@ self.C3_GetObjectRefTable = function () {
 		C3.Behaviors.Platform.Acts.SimulateControl,
 		C3.Plugins.Keyboard.Cnds.OnAnyKey,
 		C3.Plugins.Audio.Acts.SetVolume,
+		C3.Plugins.System.Acts.SetVar,
 		C3.Plugins.System.Acts.CreateObject,
 		C3.Plugins.Text.Exps.X,
 		C3.Plugins.Text.Exps.Y,
@@ -6078,37 +5989,26 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.Eponesh_GameScore.Acts.PlayerSetScore,
 		C3.Plugins.Eponesh_GameScore.Acts.PlayerWaitForReady,
 		C3.Behaviors.EightDir.Acts.SimulateControl,
+		C3.Plugins.System.Cnds.EveryTick,
 		C3.Plugins.Sprite.Acts.SetAnimFrame,
-		C3.Plugins.Sprite.Cnds.CompareInstanceVar,
-		C3.Plugins.System.Acts.SetObjectTimescale,
-		C3.Behaviors.Fade.Acts.StartFade,
 		C3.Plugins.Browser.Acts.GoToURL,
-		C3.Plugins.System.Acts.WaitForPreviousActions,
+		C3.Plugins.Keyboard.Cnds.IsKeyDown,
 		C3.Plugins.Touch.Cnds.OnDoubleTapGestureObject,
+		C3.Behaviors.Fade.Acts.StartFade,
 		C3.Plugins.Touch.Cnds.OnDoubleTapGesture,
 		C3.Plugins.Text.Cnds.OnCreated,
 		C3.Behaviors.Flash.Acts.Flash,
 		C3.Behaviors.Platform.Acts.SetVectorX,
 		C3.Behaviors.Flash.Cnds.OnFlashEnded,
-		C3.Plugins.System.Acts.RestartLayout,
 		C3.Plugins.System.Cnds.IsGroupActive,
 		C3.Plugins.Sprite.Cnds.OnCreated,
-		C3.Plugins.NinePatch.Cnds.PickByUID,
-		C3.Plugins.Text.Acts.SetX,
-		C3.Plugins.Text.Acts.SetY,
-		C3.Plugins.Text.Cnds.PickByUID,
-		C3.Plugins.System.Cnds.TriggerOnce,
-		C3.Plugins.Text.Acts.SetSize,
-		C3.Plugins.Text.Acts.SetPos,
-		C3.Plugins.Audio.Cnds.OnEnded,
 		C3.Plugins.TiledBg.Acts.SetWidth,
 		C3.Plugins.TiledBg.Exps.Width,
 		C3.Plugins.TiledBg.Exps.X,
 		C3.Plugins.TiledBg.Cnds.CompareWidth,
 		C3.Plugins.System.Cnds.Compare,
 		C3.Plugins.System.Exps.loadingprogress,
-		C3.Behaviors.Fade.Cnds.OnFadeOutEnd,
-		C3.Plugins.System.Cnds.OnLoadFinished
+		C3.Behaviors.Fade.Cnds.OnFadeOutEnd
 	];
 };
 self.C3_JsPropNameTable = [
@@ -6147,7 +6047,6 @@ self.C3_JsPropNameTable = [
 	{CentrarEm: 0},
 	{torre: 0},
 	{verigicador: 0},
-	{DestroyOutsideLayout: 0},
 	{navePlayer: 0},
 	{Barreiradireita: 0},
 	{criador_item1: 0},
@@ -6350,8 +6249,6 @@ self.C3_JsPropNameTable = [
 	{Navegador: 0},
 	{link: 0},
 	{Texto3: 0},
-	{OnlyOnline: 0},
-	{DestroyOnLocal: 0},
 	{Texto4: 0},
 	{Fundodireita: 0},
 	{fundoesquerda: 0},
@@ -6375,7 +6272,6 @@ self.C3_JsPropNameTable = [
 	{re: 0},
 	{Texto8: 0},
 	{Texto9: 0},
-	{isShadow: 0},
 	{score: 0},
 	{score2: 0},
 	{Anubis: 0},
@@ -6451,7 +6347,6 @@ self.C3_JsPropNameTable = [
 	{Feedback5: 0},
 	{Feedback6: 0},
 	{PLAYAGAIN: 0},
-	{som: 0},
 	{causaDano7: 0},
 	{Sprite44: 0},
 	{EfeitoFade: 0},
@@ -6465,46 +6360,12 @@ self.C3_JsPropNameTable = [
 	{Texto11: 0},
 	{TiledBackground2: 0},
 	{REI: 0},
-	{blocoBasic2: 0},
-	{Sprite45: 0},
-	{NameTop1: 0},
-	{ScoreTop1txt: 0},
-	{NameTop2: 0},
-	{ScoreTop2txt: 0},
-	{NameTop3: 0},
-	{ScoreTop3txt: 0},
-	{NameTop4: 0},
-	{ScoreTop4txt: 0},
-	{NameTop5: 0},
-	{ScoreTop5txt: 0},
-	{fecharRank: 0},
-	{LocalStorage: 0},
-	{TEXTOBASICO2: 0},
-	{trocafinal2: 0},
-	{Sprite46: 0},
-	{Sprite47: 0},
-	{Logo2: 0},
-	{TextInput2: 0},
-	{TextInput3: 0},
 	{FPlayer: 0},
 	{Familia1: 0},
 	{dano: 0},
 	{Familia2: 0},
 	{Familia3: 0},
-	{isOnline: 0},
 	{liberador: 0},
-	{ScoreTop1: 0},
-	{ScoreTop2: 0},
-	{ScoreTop3: 0},
-	{ScoreTop4: 0},
-	{ScoreTop5: 0},
-	{NomeTop1: 0},
-	{NomeTop2: 0},
-	{NomeTop3: 0},
-	{NomeTop4: 0},
-	{NomeTop5: 0},
-	{Nome: 0},
-	{Score: 0},
 	{Um_rastro_vida: 0},
 	{No_espaço_vida: 0},
 	{ItemsSecretos: 0},
@@ -6649,19 +6510,6 @@ self.C3_ExpressionFuncs = [
 			const f0 = p._GetNode(0).GetBoundMethod();
 			return () => f0();
 		},
-		() => "nomeTop1",
-		() => "nomeTop2",
-		() => "nomeTop3",
-		() => "nomeTop4",
-		() => "nomeTop5",
-		() => "scoreTop1",
-		() => "scoreTop2",
-		() => "scoreTop3",
-		() => "scoreTop4",
-		() => "scoreTop5",
-		() => "nome",
-		() => "score",
-		() => "Só irão para o ranking as pontuações adquiridas no modo difícil.",
 		() => 4,
 		() => 1,
 		p => {
@@ -6673,45 +6521,15 @@ self.C3_ExpressionFuncs = [
 			const n0 = p._GetNode(0);
 			return () => n0.ExpObject();
 		},
+		() => "score",
+		() => 10,
 		() => "",
-		() => "email",
-		() => "instagram",
-		() => 33,
-		p => {
-			const v0 = p._GetNode(0).GetVar();
-			return () => v0.GetValue();
-		},
-		p => {
-			const v0 = p._GetNode(0).GetVar();
-			return () => ("1." + v0.GetValue());
-		},
-		p => {
-			const v0 = p._GetNode(0).GetVar();
-			return () => ("2." + v0.GetValue());
-		},
-		p => {
-			const v0 = p._GetNode(0).GetVar();
-			return () => ("3." + v0.GetValue());
-		},
-		p => {
-			const v0 = p._GetNode(0).GetVar();
-			return () => ("4." + v0.GetValue());
-		},
-		p => {
-			const v0 = p._GetNode(0).GetVar();
-			return () => ("5." + v0.GetValue());
-		},
 		() => "musica",
 		() => -140,
 		() => "vocal",
 		() => "Animation 3",
 		() => "Animation 2",
 		() => 400,
-		p => {
-			const f0 = p._GetNode(0).GetBoundMethod();
-			return () => f0(0, 1);
-		},
-		() => 10,
 		() => 0.3,
 		() => 20,
 		() => 30,
@@ -6721,11 +6539,11 @@ self.C3_ExpressionFuncs = [
 		() => 3,
 		() => "SAFFIRA CHEGA COM TUDO!",
 		() => 2,
-		() => "AJUDE-A LIBERTÁ-LA DE SEUS DESEJOS",
+		() => "AJUDE A LIBERTÁ-LA DOS DESEJOS",
 		() => "TOME CUIDADO COM SEUS INSTINTOS!",
 		() => "OUÇA A VOZ DO SEU CORAÇÃO!",
-		() => "Use os botões laterais para se mover e pular.",
-		() => "Não se esqueça: \nNem tudo que \nreluz é ouro!",
+		() => "Use as setas laterais para se mover e pular.",
+		() => "Não se esqueça, \nnem tudo que \nreluz é ouro!",
 		() => 0.4,
 		() => 330,
 		p => {
@@ -6754,19 +6572,22 @@ self.C3_ExpressionFuncs = [
 			return () => C3.lerp(n0.ExpObject(), 7257.5, 0.05);
 		},
 		() => "Animation 4",
+		() => -10,
 		() => 0.7,
 		() => 270,
 		p => {
 			const n0 = p._GetNode(0);
 			return () => C3.lerp(n0.ExpObject(), 10787, 0.05);
 		},
+		p => {
+			const v0 = p._GetNode(0).GetVar();
+			return () => v0.GetValue();
+		},
 		() => 8,
 		() => "outro",
-		() => -10,
 		() => "coin",
 		() => "bomba",
 		() => -2,
-		() => "coca",
 		() => "bomb",
 		() => -3,
 		() => -1023,
@@ -6781,7 +6602,7 @@ self.C3_ExpressionFuncs = [
 		() => "Animation 5",
 		() => "https://Supersaffira.com",
 		() => 200,
-		() => 229,
+		() => 223,
 		() => "https://www.youtube.com/watch?v=ji5KDN_KvKI&ab_channel=SuperSaffira",
 		() => "https://open.spotify.com/album/4wLgMdQJvjFclUtTLUp5rY?highlight=spotify:track:7BlWv7lcqQWyOunAsacl3J",
 		() => "https://www.instagram.com/supersaffira/",
@@ -6799,36 +6620,12 @@ self.C3_ExpressionFuncs = [
 		},
 		() => 15,
 		() => 11,
-		() => "blue",
 		() => 0.05,
 		() => -1000,
 		() => "Feedback",
 		() => -250,
-		() => "Correções",
-		() => 480,
-		p => {
-			const n0 = p._GetNode(0);
-			return () => (n0.ExpObject() + 9);
-		},
-		p => {
-			const n0 = p._GetNode(0);
-			return () => (n0.ExpObject() + 7);
-		},
-		() => 484,
-		() => 23.707431,
-		() => 34.638456,
-		() => 324.315102,
-		() => 322.315102,
-		() => 8.1014,
-		() => 43.079719,
-		() => 304.942813,
-		() => 302.942813,
-		() => 61.510299,
-		() => 286.512233,
-		() => 284.512233,
 		() => "Não se esqueça do double jump!",
 		() => "Seja mais atento à seus desejos!",
-		() => "Não deixe seus vícios reinarem, reabilite-se!",
 		() => "Você foi muito ambicioso!",
 		() => "http://institutoazul97.com/",
 		p => {
