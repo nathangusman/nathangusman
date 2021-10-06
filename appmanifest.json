@@ -1,0 +1,10 @@
+{
+	"name": "Super Saffira - TUDO Game Lyric",
+	"short_name": "Super Saffira - TUDO Game Lyric",
+	"description": "Ajude a libertar a Super Saffira de TUDO!",
+	"start_url": "index.html",
+	"display": "fullscreen",
+	"orientation": "landscape",
+	"background_color": "#ffffff",
+	"icons": []
+}
