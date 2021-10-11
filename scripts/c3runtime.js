@@ -6038,13 +6038,15 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.Audio.Acts.Preload,
 		C3.Plugins.System.Cnds.CompareBoolVar,
 		C3.Plugins.Eponesh_GameScore.Cnds.PlayerHasKey,
-		C3.Plugins.System.Acts.SetLayerVisible,
-		C3.Plugins.TextBox.Acts.SetText,
 		C3.Plugins.Text.Acts.SetText,
 		C3.Plugins.Eponesh_GameScore.Exps.PlayerID,
 		C3.Plugins.System.Cnds.Else,
+		C3.Plugins.System.Acts.SetLayerVisible,
+		C3.Plugins.TextBox.Acts.SetText,
 		C3.Plugins.Eponesh_GameScore.Exps.PlayerGet,
 		C3.Plugins.Eponesh_GameScore.Exps.PlayerName,
+		C3.Behaviors.Sin.Acts.SetEnabled,
+		C3.Plugins.Sprite.Acts.SetAnimFrame,
 		C3.Plugins.LocalStorage.Acts.CheckItemExists,
 		C3.Plugins.TextBox.Acts.Destroy,
 		C3.Plugins.Text.Cnds.IsBoolInstanceVarSet,
@@ -6111,7 +6113,6 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.NinePatch.Acts.Destroy,
 		C3.Plugins.System.Exps.rgbex255,
 		C3.Plugins.NinePatch.Acts.AddInstanceVar,
-		C3.Behaviors.Sin.Acts.SetEnabled,
 		C3.Plugins.Sprite.Cnds.PickChildren,
 		C3.Plugins.NinePatch.Cnds.CompareInstanceVar,
 		C3.Plugins.NinePatch.Acts.SetVisible,
@@ -6126,7 +6127,6 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.Eponesh_GameScore.Acts.PlayerSetScore,
 		C3.Plugins.Eponesh_GameScore.Acts.PlayerWaitForReady,
 		C3.Behaviors.EightDir.Acts.SimulateControl,
-		C3.Plugins.Sprite.Acts.SetAnimFrame,
 		C3.Plugins.Sprite.Cnds.CompareInstanceVar,
 		C3.Plugins.System.Acts.SetObjectTimescale,
 		C3.Behaviors.Fade.Acts.StartFade,
@@ -6497,6 +6497,8 @@ self.C3_JsPropNameTable = [
 	{TextInput: 0},
 	{TextoNomePlayer: 0},
 	{Confirmarnome: 0},
+	{Sine: 0},
+	{Sine2: 0},
 	{engrenagem: 0},
 	{leaderboard: 0},
 	{TiledBackground: 0},
@@ -6526,7 +6528,6 @@ self.C3_JsPropNameTable = [
 	{TextInput3: 0},
 	{TiledBackground3: 0},
 	{Sprite10: 0},
-	{Sine: 0},
 	{Sprite14: 0},
 	{textotorneio: 0},
 	{FPlayer: 0},
@@ -6677,12 +6678,11 @@ self.C3_ExpressionFuncs = [
 		() => 0,
 		() => "loopMu",
 		() => "customname",
-		() => 6,
-		() => "Player",
 		p => {
 			const f0 = p._GetNode(0).GetBoundMethod();
-			return () => and("Player#", f0());
+			return () => and("#", f0());
 		},
+		() => 6,
 		p => {
 			const f0 = p._GetNode(0).GetBoundMethod();
 			return () => f0("customname");
@@ -6691,6 +6691,7 @@ self.C3_ExpressionFuncs = [
 			const f0 = p._GetNode(0).GetBoundMethod();
 			return () => f0();
 		},
+		() => 1,
 		() => "nomeTop1",
 		() => "nomeTop2",
 		() => "nomeTop3",
@@ -6705,7 +6706,6 @@ self.C3_ExpressionFuncs = [
 		() => "score",
 		() => "Só irão para o ranking as pontuações adquiridas no modo difícil.",
 		() => 4,
-		() => 1,
 		p => {
 			const n0 = p._GetNode(0);
 			const f1 = p._GetNode(1).GetBoundMethod();
@@ -6718,7 +6718,7 @@ self.C3_ExpressionFuncs = [
 		() => "",
 		() => "email",
 		() => "instagram",
-		() => 32,
+		() => 100,
 		p => {
 			const v0 = p._GetNode(0).GetVar();
 			return () => v0.GetValue();
@@ -6758,7 +6758,6 @@ self.C3_ExpressionFuncs = [
 		() => 0.3,
 		() => 20,
 		() => 30,
-		() => 100,
 		() => 313.205455,
 		() => 458.191818,
 		() => 3,
