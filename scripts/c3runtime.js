@@ -6745,7 +6745,8 @@ self.C3_ExpressionFuncs = [
 			const v0 = p._GetNode(0).GetVar();
 			return () => ("5." + v0.GetValue());
 		},
-		() => "https://www.youtube.com/watch?v=WaSGN7bu5Bk",
+		() => "http://supersaffira.com/torneio",
+		() => "https://youtu.be/ji5KDN_KvKI",
 		() => "musica",
 		() => -140,
 		() => "vocal",
